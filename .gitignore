@@ -16,3 +16,4 @@ id_rsa*
 # Tooling
 node_modules/
 _site/
+.playwright-mcp/

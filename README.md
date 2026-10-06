@@ -4,6 +4,8 @@ A demo IT PMO Kanban board for a fictitious bank, **"ABC IT PMO"**, built as a s
 
 **Live demo:** https://rakeshgurumoorthi.github.io/claude-training-kanban/
 
+![ABC IT PMO Kanban board with Backlog, In Progress, Blocked and Done columns](docs/screenshot.png)
+
 ## Features
 
 - **Four columns:** Backlog, In Progress, Blocked and Done, each with a live count badge.
