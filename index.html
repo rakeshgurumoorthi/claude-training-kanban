@@ -406,6 +406,25 @@
   }
 
   /* =========================================================
+     IT Project Briefing notice (shown after 10s on the page)
+     ========================================================= */
+  .briefing-dialog { width: min(440px, calc(100vw - 32px)); }
+  .briefing-body { padding: var(--space-5); }
+  .briefing-body p { margin: 0 0 var(--space-4); color: var(--grey-700); }
+  .briefing-details {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-2) var(--space-4);
+    margin: 0;
+    padding: var(--space-3) var(--space-4);
+    background: var(--blue-50);
+    border: 1px solid var(--blue-100);
+    border-radius: var(--radius-sm);
+  }
+  .briefing-details dt { font-weight: 600; font-size: 0.85rem; color: var(--grey-700); }
+  .briefing-details dd { margin: 0; font-weight: 600; color: var(--blue-900); }
+
+  /* =========================================================
      Toasts
      ========================================================= */
   .toast-region {
@@ -570,6 +589,24 @@
   </form>
 </dialog>
 
+<!-- IT Project Briefing notice: opened by scheduleBriefing() after 10s on the page -->
+<dialog id="briefingDialog" class="briefing-dialog" aria-labelledby="briefingTitle" aria-describedby="briefingDesc">
+  <div class="modal-head">
+    <h2 id="briefingTitle">IT Project Briefing</h2>
+    <button type="button" class="icon-btn" id="closeBriefing" aria-label="Close briefing notice">&times;</button>
+  </div>
+  <div class="briefing-body">
+    <p id="briefingDesc">All project teams are invited to the IT Project Briefing.</p>
+    <dl class="briefing-details">
+      <dt>When</dt><dd>Wednesday 7 October 2026, 2:00 PM</dd>
+      <dt>Where</dt><dd>Town Hall Meeting Room</dd>
+    </dl>
+    <div class="form-actions">
+      <button type="button" class="btn btn-primary" id="ackBriefing" autofocus>Got it</button>
+    </div>
+  </div>
+</dialog>
+
 <!-- Toast notifications (announced politely to screen readers) -->
 <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="false"></div>
 
@@ -621,6 +658,10 @@ const CATEGORIES = [
 ];
 const PRIORITIES = ["Critical", "High", "Medium", "Low"];
 const TOAST_MS = 4500;
+// IT Project Briefing notice: shown after this much visible time on the page,
+// and not at all once the briefing has started (local time).
+const BRIEFING_DELAY_MS = 10000;
+const BRIEFING_STARTS_AT = new Date(2026, 9, 7, 14, 0); // Wed 7 Oct 2026, 2:00 PM
 
 /* =========================================================
    STATE — single source of truth; the DOM is rendered from it
@@ -1184,6 +1225,61 @@ function wireControls() {
   });
 }
 
+/* =========================================================
+   IT Project Briefing notice
+   ========================================================= */
+let briefingReturnFocus = null;
+
+// Counts only time the tab is visible, so a background tab doesn't pop it up unseen.
+// Shown once per page load; there is no persistence, so a refresh shows it again.
+function scheduleBriefing() {
+  if (Date.now() >= BRIEFING_STARTS_AT.getTime()) return;
+  let remaining = BRIEFING_DELAY_MS;
+  let startedAt = 0;
+  let timer = null;
+
+  function start() {
+    startedAt = Date.now();
+    timer = setTimeout(() => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      showBriefing();
+    }, remaining);
+  }
+  function onVisibilityChange() {
+    if (document.hidden) {
+      clearTimeout(timer);
+      remaining -= Date.now() - startedAt;
+    } else {
+      start();
+    }
+  }
+
+  document.addEventListener("visibilitychange", onVisibilityChange);
+  if (!document.hidden) start();
+}
+
+function showBriefing() {
+  // Don't stack on top of a half-filled Add Task form; wait until it closes.
+  const taskDialog = document.getElementById("taskDialog");
+  if (taskDialog.open) {
+    taskDialog.addEventListener("close", showBriefing, { once: true });
+    return;
+  }
+  briefingReturnFocus = document.activeElement;
+  document.getElementById("briefingDialog").showModal();
+}
+
+function wireBriefing() {
+  const dialog = document.getElementById("briefingDialog");
+  const close = () => dialog.close();
+  document.getElementById("closeBriefing").addEventListener("click", close);
+  document.getElementById("ackBriefing").addEventListener("click", close);
+  dialog.addEventListener("click", e => { if (e.target === dialog) close(); });
+  dialog.addEventListener("close", () => {
+    if (briefingReturnFocus && briefingReturnFocus.isConnected) briefingReturnFocus.focus();
+  });
+}
+
 function init() {
   populateSelects();
   buildColumns();
@@ -1191,7 +1287,9 @@ function init() {
   wireControls();
   wireDragAndDrop();
   wireCardActions();
+  wireBriefing();
   renderBoard();
+  scheduleBriefing();
 }
 
 init();

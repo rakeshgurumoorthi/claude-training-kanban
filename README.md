@@ -22,6 +22,7 @@ The v2 **Portfolio** view turns the same tasks into a dashboard: headline figure
 - **Summary strip** in the header showing total, per-status and overdue counts. It always counts every task, including any hidden by filters.
 - **Add Task dialog** (native `<dialog>`) with inline validation. New tasks get IDs like `ABC-ITPM-0001`.
 - **Email notification** of new tasks through [FormSubmit](https://formsubmit.co/). The card is added straight away, and if the email fails you only see a warning toast.
+- **Briefing notice:** after 10 seconds on the page, a popup announces the IT Project Briefing (Wednesday 7 October 2026, 2:00 PM, Town Hall Meeting Room). It stops appearing once the briefing starts. A Claude Code `SessionStart` hook in [`.claude/hooks/`](.claude/hooks/) shows the same reminder to anyone working on the project in Claude Code.
 - Seed data uses due dates relative to today, so some cards always show as overdue.
 
 ## Running it
