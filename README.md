@@ -1,11 +1,14 @@
 # claude-training-kanban
 
-A demo IT PMO Kanban board for a fictitious bank, **"ABC IT PMO"**, built as a single vanilla HTML/CSS/JS file.
+A demo IT PMO Kanban board for a fictitious bank, **"ABC IT PMO"**, built with vanilla HTML/CSS/JS. Each version is a single file.
 
-**Live demo:** https://rakeshgurumoorthi.github.io/claude-training-kanban/ (v1)  
-**v2 redesign:** https://rakeshgurumoorthi.github.io/claude-training-kanban/v2/. It adds a modern layout, a Portfolio dashboard view (KPIs, status by project, workload, due window and a sortable task table) and priority filter chips.
+**Live demo (v1):** https://rakeshgurumoorthi.github.io/claude-training-kanban/
 
 ![ABC IT PMO Kanban board with Backlog, In Progress, Blocked and Done columns](docs/screenshot.png)
+
+**v2 redesign:** https://rakeshgurumoorthi.github.io/claude-training-kanban/v2/. It adds a modern layout, a Portfolio dashboard view (KPIs, status by project, workload, due window and a sortable task table) and priority filter chips. v1 stays at the root, unchanged.
+
+![ABC IT PMO Kanban v2 with a slim top bar, status summary, priority filter chips and four columns of cards](docs/screenshot-v2.png)
 
 ## Features
 
@@ -38,7 +41,7 @@ const FORMSUBMIT_ENDPOINT = "https://formsubmit.co/ajax/YOUR_EMAIL@example.com";
 ## Constraints
 
 - Vanilla HTML, CSS and JavaScript only, with no frameworks, libraries, build step or npm.
-- One self-contained file that runs from `file://`.
+- Each version is one self-contained file (`index.html`, `v2/index.html`) that runs from `file://`.
 - No external resources (CDNs, web fonts or images). It uses the system font stack and inline SVG or Unicode icons.
 - No persistence (no localStorage, sessionStorage, IndexedDB or cookies). Refreshing resets the board to the seed data on purpose.
 - The only network call is FormSubmit's AJAX endpoint.
@@ -48,12 +51,12 @@ const FORMSUBMIT_ENDPOINT = "https://formsubmit.co/ajax/YOUR_EMAIL@example.com";
 
 The workflow is [`.github/workflows/pages.yml`](.github/workflows/pages.yml).
 
-The **`ci`** job runs on every push to `main`, every pull request to `main`, and manual runs. It checks:
+The **`ci`** job runs on every push to `main`, every pull request to `main`, and manual runs. It checks both `index.html` and `v2/index.html` for:
 
 - the project constraints (no storage APIs, `alert`/`confirm`, `!important` or external `<link>`/`src`)
-- that the `<script>` block parses (`node --check`)
-- for secrets: private keys, cloud/API tokens and hard-coded passwords
-- that `FORMSUBMIT_ENDPOINT` still holds the `YOUR_EMAIL@example.com` placeholder
+- a `<script>` block that parses (`node --check`)
+- no secrets (checked across every tracked file): private keys, cloud/API tokens and hard-coded passwords
+- a `FORMSUBMIT_ENDPOINT` that still holds the `YOUR_EMAIL@example.com` placeholder
 
 The **`deploy`** job runs only after `ci` passes, on a push to `main` or a manual run. It publishes `index.html` to the GitHub Pages root and `v2/index.html` to `/v2/`.
 
