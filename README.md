@@ -10,6 +10,10 @@ A demo IT PMO Kanban board for a fictitious bank, **"ABC IT PMO"**, built with v
 
 ![ABC IT PMO Kanban v2 with a slim top bar, status summary, priority filter chips and four columns of cards](docs/screenshot-v2.png)
 
+The v2 **Portfolio** view turns the same tasks into a dashboard: headline figures, status by project, due window, open workload by assignee, priority mix and a sortable task table.
+
+![ABC IT PMO Kanban v2 Portfolio view with KPI figures, bar charts by project, due window, assignee and priority, and a sortable task table](docs/screenshot-v2-portfolio.png)
+
 ## Features
 
 - **Four columns:** Backlog, In Progress, Blocked and Done, each with a live count badge.
