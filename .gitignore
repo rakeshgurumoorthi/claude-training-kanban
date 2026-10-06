@@ -1,0 +1,18 @@
+# OS / editor
+.DS_Store
+.vscode/
+
+# Secrets
+.env*
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Tooling
+node_modules/
+_site/
