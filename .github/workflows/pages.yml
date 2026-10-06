@@ -48,8 +48,8 @@ jobs:
       - name: Secret scan
         run: |
           pattern='-----BEGIN (RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY-----|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|github_pat_|gho_|xox[baprs]-|sk-[A-Za-z0-9]{20,}|sk-ant-|AIza[0-9A-Za-z_-]{35}|(password|passwd|secret|api[_-]?key|token|client[_-]?secret)[[:space:]]*[:=][[:space:]]*["'"'"'][^"'"'"']{6,}'
-          # The workflow and the publish command are excluded because they contain the patterns.
-          if git ls-files -z -- . ':!:.github/workflows/pages.yml' ':!:.claude/commands/publish-github.md' | xargs -0 grep -nIE -- "$pattern"; then
+          # The workflow, the publish command and the security-scanner agent are excluded because they contain the patterns.
+          if git ls-files -z -- . ':!:.github/workflows/pages.yml' ':!:.claude/commands/publish-github.md' ':!:.claude/agents/security-scanner.md' | xargs -0 grep -nIE -- "$pattern"; then
             echo "::error::Possible secret found (see matches above)"
             exit 1
           fi

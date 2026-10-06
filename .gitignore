@@ -17,3 +17,6 @@ id_rsa*
 node_modules/
 _site/
 .playwright-mcp/
+
+# Security scan reports (security-scanner agent)
+reports/
