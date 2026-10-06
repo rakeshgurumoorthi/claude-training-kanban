@@ -2,7 +2,8 @@
 
 A demo IT PMO Kanban board for a fictitious bank, **"ABC IT PMO"**, built as a single vanilla HTML/CSS/JS file.
 
-**Live demo:** https://rakeshgurumoorthi.github.io/claude-training-kanban/
+**Live demo:** https://rakeshgurumoorthi.github.io/claude-training-kanban/ (v1)  
+**v2 redesign:** https://rakeshgurumoorthi.github.io/claude-training-kanban/v2/. It adds a modern layout, a Portfolio dashboard view (KPIs, status by project, workload, due window and a sortable task table) and priority filter chips.
 
 ![ABC IT PMO Kanban board with Backlog, In Progress, Blocked and Done columns](docs/screenshot.png)
 
@@ -18,11 +19,11 @@ A demo IT PMO Kanban board for a fictitious bank, **"ABC IT PMO"**, built as a s
 
 ## Running it
 
-Open `index.html` in a browser by double-clicking it or with `open index.html`. There's nothing to build, install or serve.
+Open `index.html` (v1) or `v2/index.html` (v2) in a browser by double-clicking it, or with `open`. There's nothing to build, install or serve.
 
 ## Configuration
 
-New-task emails go to the address in `FORMSUBMIT_ENDPOINT`, at the top of the `<script>` block in `index.html`:
+New-task emails go to the address in `FORMSUBMIT_ENDPOINT`, at the top of the `<script>` block in `index.html` and, separately, in `v2/index.html`:
 
 ```js
 const FORMSUBMIT_ENDPOINT = "https://formsubmit.co/ajax/YOUR_EMAIL@example.com";
@@ -54,7 +55,7 @@ The **`ci`** job runs on every push to `main`, every pull request to `main`, and
 - for secrets: private keys, cloud/API tokens and hard-coded passwords
 - that `FORMSUBMIT_ENDPOINT` still holds the `YOUR_EMAIL@example.com` placeholder
 
-The **`deploy`** job runs only after `ci` passes, on a push to `main` or a manual run. It publishes `index.html` to GitHub Pages.
+The **`deploy`** job runs only after `ci` passes, on a push to `main` or a manual run. It publishes `index.html` to the GitHub Pages root and `v2/index.html` to `/v2/`.
 
 ## Disclaimer
 

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A demo/training IT PMO Kanban board for a fictitious bank ("ABC IT PMO"). The whole app is one file, `index.html`, holding the markup, one `<style>` block and one `<script>` block. Do not use any real bank's logo, trademarks or system styling. The brand is a text wordmark plus a corporate blue palette.
+A demo/training IT PMO Kanban board for a fictitious bank ("ABC IT PMO"). Each version of the app is one file holding the markup, one `<style>` block and one `<script>` block. `index.html` is v1, served at the Pages root, and is kept as-is. `v2/index.html` is the redesign, served at `/v2/`, with a Board/Portfolio view switch, priority filter chips and a dashboard. The two files do not share code, so a fix to shared behaviour (validation, FormSubmit, drag and drop) has to be made in both. The architecture notes below apply to both; v2 adds `state.view`, `state.sort`, `state.animateId` and `state.animateBars`, plus `renderDashboard()`, which `renderBoard()` calls. Do not use any real bank's logo, trademarks or system styling. The brand is a text wordmark plus a corporate blue palette.
 
 ## Hard constraints (keep these when editing)
 
@@ -19,10 +19,14 @@ A demo/training IT PMO Kanban board for a fictitious bank ("ABC IT PMO"). The wh
 
 There is no build or test suite.
 
-- Run: `open index.html`
+- Run: `open index.html` (v1) or `open v2/index.html` (v2)
 - Syntax-check the script: extract the `<script>` block to a scratch file and run `node --check` on it.
 - Constraint check (should print nothing):
-  `grep -nE "localStorage|sessionStorage|indexedDB|document\.cookie|alert\(|confirm\(|!important|<link|src=\"http" index.html`
+  `grep -nE "localStorage|sessionStorage|indexedDB|document\.cookie|alert\(|confirm\(|!important|<link|src=\"http" index.html v2/index.html`
+
+## Project skills
+
+`.claude/skills/` holds third-party skills (tracked in `skills-lock.json`) customized for this board: `design-taste-frontend-v1` (UI polish), `build-dashboard` (PMO dashboard with inline SVG/CSS charts), `hyperframes-animation` (CSS/WAAPI motion in the app; HyperFrames videos in `promo/`) and `hyperframes-creative` (promo video brand). Each starts with a **PROJECT OVERRIDES** section that wins over the upstream text below it. `npx skills update` overwrites these files, so re-apply the overrides after updating.
 
 ## Architecture (inside the `<script>`)
 

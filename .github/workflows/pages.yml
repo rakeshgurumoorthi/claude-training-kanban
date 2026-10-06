@@ -22,8 +22,8 @@ jobs:
 
       - name: Project constraint check
         run: |
-          if grep -nE "localStorage|sessionStorage|indexedDB|document\.cookie|alert\(|confirm\(|!important|<link|src=\"http" index.html; then
-            echo "::error file=index.html::Constraint check failed (see matches above)"
+          if grep -nE "localStorage|sessionStorage|indexedDB|document\.cookie|alert\(|confirm\(|!important|<link|src=\"http" index.html v2/index.html; then
+            echo "::error::Constraint check failed (see matches above)"
             exit 1
           fi
 
@@ -35,13 +35,15 @@ jobs:
         run: |
           python3 - <<'PY'
           import re, sys
-          html = open("index.html", encoding="utf-8").read()
-          blocks = re.findall(r"<script>(.*?)</script>", html, re.S)
-          if not blocks:
-              sys.exit("No <script> block found in index.html")
-          open("/tmp/app.js", "w", encoding="utf-8").write("\n".join(blocks))
+          for src, out in [("index.html", "/tmp/app.js"), ("v2/index.html", "/tmp/app-v2.js")]:
+              html = open(src, encoding="utf-8").read()
+              blocks = re.findall(r"<script>(.*?)</script>", html, re.S)
+              if not blocks:
+                  sys.exit(f"No <script> block found in {src}")
+              open(out, "w", encoding="utf-8").write("\n".join(blocks))
           PY
           node --check /tmp/app.js
+          node --check /tmp/app-v2.js
 
       - name: Secret scan
         run: |
@@ -54,10 +56,12 @@ jobs:
 
       - name: FormSubmit endpoint must hold the placeholder
         run: |
-          if ! grep -E '^const FORMSUBMIT_ENDPOINT = ' index.html | grep -q 'YOUR_EMAIL@example.com'; then
-            echo "::error file=index.html::FORMSUBMIT_ENDPOINT must contain YOUR_EMAIL@example.com, not a real address"
-            exit 1
-          fi
+          for f in index.html v2/index.html; do
+            if ! grep -E '^const FORMSUBMIT_ENDPOINT = ' "$f" | grep -q 'YOUR_EMAIL@example.com'; then
+              echo "::error file=$f::FORMSUBMIT_ENDPOINT must contain YOUR_EMAIL@example.com, not a real address"
+              exit 1
+            fi
+          done
 
   deploy:
     needs: ci
@@ -74,7 +78,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
       - name: Stage site
-        run: mkdir _site && cp index.html _site/
+        # v1 stays at the site root; v2 is published alongside it at /v2/.
+        run: mkdir -p _site/v2 && cp index.html _site/ && cp v2/index.html _site/v2/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
