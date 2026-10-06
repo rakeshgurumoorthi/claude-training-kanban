@@ -23,6 +23,7 @@ The v2 **Portfolio** view turns the same tasks into a dashboard: headline figure
 - **Add Task dialog** (native `<dialog>`) with inline validation. New tasks get IDs like `ABC-ITPM-0001`.
 - **Email notification** of new tasks through [FormSubmit](https://formsubmit.co/). The card is added straight away, and if the email fails you only see a warning toast.
 - **Briefing notice:** after 10 seconds on the page, a popup announces the IT Project Briefing (Wednesday 7 October 2026, 2:00 PM, Town Hall Meeting Room). It stops appearing once the briefing starts. A Claude Code `SessionStart` hook in [`.claude/hooks/`](.claude/hooks/) shows the same reminder to anyone working on the project in Claude Code.
+- **WhatsApp chat widget:** a floating button at the bottom right opens a list of suggested IT project questions. Picking one opens WhatsApp in a new tab with that question ready to send. The questions are fixed text, never board data, and the number is a dummy (`WHATSAPP_NUMBER`) to replace in your copy.
 - Seed data uses due dates relative to today, so some cards always show as overdue.
 
 ## Running it
@@ -49,7 +50,7 @@ const FORMSUBMIT_ENDPOINT = "https://formsubmit.co/ajax/YOUR_EMAIL@example.com";
 - Each version is one self-contained file (`index.html`, `v2/index.html`) that runs from `file://`.
 - No external resources (CDNs, web fonts or images). It uses the system font stack and inline SVG or Unicode icons.
 - No persistence (no localStorage, sessionStorage, IndexedDB or cookies). Refreshing resets the board to the seed data on purpose.
-- The only network call is FormSubmit's AJAX endpoint.
+- The only network call is FormSubmit's AJAX endpoint. The WhatsApp `wa.me` links are plain links that open only when clicked.
 - No `alert()`, `confirm()` or `!important`. Errors appear inline and notices as toasts.
 
 ## CI/CD

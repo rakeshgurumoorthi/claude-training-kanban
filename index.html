@@ -37,6 +37,8 @@
     --success:  #1e7b45;
     --warning:  #9a5b00;
     --focus:    #f5b700;
+    --wa-green: #128c7e;      /* WhatsApp teal: white icon on it passes 3:1 */
+    --wa-green-dark: #0d6e63;
 
     --space-1: 4px;
     --space-2: 8px;
@@ -425,12 +427,68 @@
   .briefing-details dd { margin: 0; font-weight: 600; color: var(--blue-900); }
 
   /* =========================================================
+     WhatsApp chat widget (floating launcher + suggested queries)
+     ========================================================= */
+  .chat-launcher {
+    position: fixed;
+    right: var(--space-4);
+    bottom: var(--space-4);
+    z-index: 90;
+    display: grid;
+    place-items: center;
+    width: 56px; height: 56px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--wa-green);
+    color: var(--white);
+    box-shadow: var(--shadow-md);
+    cursor: pointer;
+    transition: background 120ms ease, transform 120ms ease;
+  }
+  .chat-launcher:hover { background: var(--wa-green-dark); transform: translateY(-2px); }
+  .chat-launcher:active { transform: scale(0.95); }
+  .chat-dialog {
+    position: fixed;
+    inset: auto var(--space-4) calc(56px + var(--space-4) * 2) auto;
+    margin: 0;
+    width: min(380px, calc(100vw - 32px));
+    max-height: calc(100vh - 120px);
+    overflow: auto;
+  }
+  .chat-dialog::backdrop { background: rgba(11, 37, 69, 0.18); backdrop-filter: none; }
+  .chat-body { padding: var(--space-3) var(--space-5) var(--space-5); }
+  .chat-body > p { margin: 0 0 var(--space-3); font-size: 0.85rem; color: var(--grey-700); }
+  .chat-queries { list-style: none; margin: 0 0 var(--space-3); padding: 0; display: grid; gap: var(--space-2); }
+  .chat-query {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--blue-100);
+    border-radius: var(--radius);
+    background: var(--blue-50);
+    color: var(--blue-900);
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .chat-query:hover { background: var(--blue-100); border-color: var(--blue-500); }
+  .chat-query span { flex: 1; }
+  .chat-query svg { flex: none; color: var(--wa-green); }
+  .chat-blank { font-size: 0.85rem; font-weight: 600; color: var(--blue-700); }
+  @media (prefers-reduced-motion: reduce) {
+    .chat-launcher, .chat-query { transition: none; }
+    .chat-launcher:hover, .chat-launcher:active { transform: none; }
+  }
+
+  /* =========================================================
      Toasts
      ========================================================= */
   .toast-region {
     position: fixed;
     right: var(--space-4);
-    bottom: var(--space-4);
+    bottom: calc(56px + var(--space-4) * 2);
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
@@ -607,6 +665,22 @@
   </div>
 </dialog>
 
+<!-- WhatsApp chat widget: the launcher opens #chatDialog via useChatSuggestions() -->
+<button type="button" class="chat-launcher" id="chatLauncher" aria-haspopup="dialog" aria-controls="chatDialog" aria-label="Chat with the IT PMO on WhatsApp" title="Chat with the IT PMO on WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2a8.8 8.8 0 0 0-7.6 13.2L3.2 20.8l4.5-1.2A8.8 8.8 0 1 0 12 3.2z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.3 7.6c-.3 0-.7.1-1 .5-.4.4-.9 1.1-.9 2.2 0 1.3.9 2.6 1.1 2.8.1.2 1.8 2.9 4.5 3.9 2.2.9 2.7.7 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.2-.2-.5-.3l-1.8-.9c-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1-.3-.1-1.1-.4-2.1-1.3-.8-.7-1.3-1.5-1.4-1.8-.1-.2 0-.4.1-.5l.4-.5.3-.4c.1-.2 0-.3 0-.5l-.8-1.9c-.2-.5-.4-.4-.5-.4h-.6z" fill="currentColor"/></svg>
+</button>
+<dialog id="chatDialog" class="chat-dialog" aria-labelledby="chatTitle" aria-describedby="chatDesc">
+  <div class="modal-head">
+    <h2 id="chatTitle">Chat with the IT PMO</h2>
+    <button type="button" class="icon-btn" data-chat-close aria-label="Close chat suggestions">&times;</button>
+  </div>
+  <div class="chat-body">
+    <p id="chatDesc">Pick a question about the IT projects. WhatsApp opens in a new tab with it ready to send.</p>
+    <ul class="chat-queries" id="chatQueries"></ul>
+    <a class="chat-blank" id="chatBlank" href="https://wa.me/6512345678" target="_blank" rel="noopener noreferrer">Or start a blank chat</a>
+  </div>
+</dialog>
+
 <!-- Toast notifications (announced politely to screen readers) -->
 <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="false"></div>
 
@@ -662,6 +736,16 @@ const TOAST_MS = 4500;
 // and not at all once the briefing has started (local time).
 const BRIEFING_DELAY_MS = 10000;
 const BRIEFING_STARTS_AT = new Date(2026, 9, 7, 14, 0); // Wed 7 Oct 2026, 2:00 PM
+// WhatsApp chat widget: wa.me wants digits only, country code first (65 = Singapore).
+const WHATSAPP_NUMBER = "6512345678";
+const CHAT_SUGGESTIONS = [
+  "What is the latest status of the IT projects in progress?",
+  "Which IT projects are overdue or blocked, and what is the plan?",
+  "Can I get an update on the Critical priority projects?",
+  "Who is the right contact for an IT project task?",
+  "How do I raise a new IT project request with the PMO?",
+  "When is the next IT Project Briefing?"
+];
 
 /* =========================================================
    STATE — single source of truth; the DOM is rendered from it
@@ -1259,10 +1343,12 @@ function scheduleBriefing() {
 }
 
 function showBriefing() {
-  // Don't stack on top of a half-filled Add Task form; wait until it closes.
-  const taskDialog = document.getElementById("taskDialog");
-  if (taskDialog.open) {
-    taskDialog.addEventListener("close", showBriefing, { once: true });
+  // Don't stack on top of the Add Task form or chat suggestions; wait until it closes.
+  const openDialog = ["taskDialog", "chatDialog"]
+    .map(id => document.getElementById(id))
+    .find(d => d.open);
+  if (openDialog) {
+    openDialog.addEventListener("close", showBriefing, { once: true });
     return;
   }
   briefingReturnFocus = document.activeElement;
@@ -1280,6 +1366,44 @@ function wireBriefing() {
   });
 }
 
+/* =========================================================
+   WhatsApp chat widget
+   ========================================================= */
+// Builds a wa.me link, with the message pre-filled when text is given.
+function whatsAppLink(text) {
+  const base = `https://wa.me/${WHATSAPP_NUMBER}`;
+  return text ? `${base}?text=${encodeURIComponent(text)}` : base;
+}
+
+// Custom hook: clicking the launcher opens a dialog of suggested IT project
+// queries. Each query is a plain link to WhatsApp, so nothing leaves the page
+// until the user picks one. Returns { open, close } for other code to use.
+function useChatSuggestions({ launcherId, dialogId, listId, suggestions }) {
+  const launcher = document.getElementById(launcherId);
+  const dialog = document.getElementById(dialogId);
+  const list = document.getElementById(listId);
+
+  list.innerHTML = suggestions.map(text => `
+    <li>
+      <a class="chat-query" href="${escapeHtml(whatsAppLink(text))}" target="_blank" rel="noopener noreferrer">
+        <span>${escapeHtml(text)}</span>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+      </a>
+    </li>`).join("");
+
+  const open = () => { if (!dialog.open) dialog.showModal(); };
+  const close = () => dialog.close();
+
+  launcher.addEventListener("click", open);
+  dialog.addEventListener("click", e => {
+    // Backdrop, the close button, or any WhatsApp link (which still opens) closes it.
+    if (e.target === dialog || e.target.closest("[data-chat-close], a")) close();
+  });
+  dialog.addEventListener("close", () => launcher.focus());
+
+  return { open, close };
+}
+
 function init() {
   populateSelects();
   buildColumns();
@@ -1288,6 +1412,12 @@ function init() {
   wireDragAndDrop();
   wireCardActions();
   wireBriefing();
+  useChatSuggestions({
+    launcherId: "chatLauncher",
+    dialogId: "chatDialog",
+    listId: "chatQueries",
+    suggestions: CHAT_SUGGESTIONS
+  });
   renderBoard();
   scheduleBriefing();
 }

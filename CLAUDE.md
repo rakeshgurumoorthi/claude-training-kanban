@@ -13,6 +13,7 @@ A demo/training IT PMO Kanban board for a fictitious bank ("ABC IT PMO"). Each v
 - No external resources: no CDN, web fonts or image files. Use the system font stack and inline SVG or Unicode for icons.
 - No persistence: no localStorage, sessionStorage, IndexedDB or cookies. A refresh resets the board to the seed data on purpose, and the header note says so.
 - The only network call is FormSubmit's AJAX endpoint. Never send data anywhere else.
+- The WhatsApp chat widget's `wa.me` links are not network calls: they open WhatsApp in a new tab only when the user clicks one. Keep their pre-filled text to the fixed `CHAT_SUGGESTIONS`, never board data.
 - No `alert()`, `confirm()` or `!important`. Errors appear inline and notices as toasts.
 
 ## Commands
@@ -39,4 +40,5 @@ There is no build or test suite.
 - **Columns:** `buildColumns()` builds the column shells once from `STATUSES`. Element ids derive from `slug(status)`, e.g. `col-in-progress-list`.
 - **Add Task form:** a native `<dialog>`. `validateForm()` writes errors into `<p id="{fieldId}Err">` elements and sets `aria-invalid`. Submit is optimistic: the card is added first, then `notifyNewTask()` runs inside try/catch, and a failure only shows a warning toast.
 - **Task IDs:** `ABC-ITPM-####`, from `formatId(state.nextId++)`.
+- **WhatsApp chat widget:** `WHATSAPP_NUMBER` and `CHAT_SUGGESTIONS` sit with the config. `useChatSuggestions()` is a custom hook called from `init()`. It fills `#chatQueries` with `wa.me` links, opens `#chatDialog` when `#chatLauncher` (fixed bottom right) is clicked, and returns `{ open, close }`. Toasts sit above the launcher, and `showBriefing()` waits for the chat dialog to close.
 - **Dates:** compared as local `YYYY-MM-DD` strings (`todayISO()`, not UTC). Seed due dates are offsets from today, so some seed cards always show as overdue.
